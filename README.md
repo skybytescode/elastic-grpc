@@ -11,6 +11,8 @@ in:
   worker over gRPC, bulk-indexes them into Elasticsearch, and offers
   full-text search, pagination and aggregations.
 
+![Architecture](docs/images/architecture.png)
+
 Both follow a hexagonal layout: the application core depends on ports
 (interfaces), and adapters (gRPC, HTTP, Elasticsearch) implement them.
 
@@ -21,6 +23,8 @@ docker compose up --build
 curl -X POST localhost:8080/create          # worker -> Elasticsearch: {"indexed": 50}
 curl 'localhost:8080/searchTitle?title=apartamente'
 ```
+
+![Demo](docs/images/demo.png)
 
 | Endpoint | Returns |
 |---|---|
@@ -84,6 +88,10 @@ ELASTICSEARCH_TEST_URL=http://localhost:9200 go test -race ./...   # + Elasticse
 [GitHub Actions](.github/workflows/ci.yml) runs gofmt, `go vet`, staticcheck
 and every test, including the integration tests against an Elasticsearch
 service container, and builds both Docker images.
+
+| | |
+|---|---|
+| ![Tests](docs/images/tests.png) | ![CI](docs/images/ci.png) |
 
 ## The gRPC contract
 
