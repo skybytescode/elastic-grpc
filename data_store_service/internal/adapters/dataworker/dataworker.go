@@ -2,11 +2,12 @@ package dataworker
 
 import (
 	"context"
-	"github.com/skybytescode/elastic-grpc/proto/ingestworker"
-	"github.com/skybytescode/elastic-grpc/data_store_service/internal/application/domain"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"log"
+
+	"github.com/skybytescode/elastic-grpc/data_store_service/internal/application/domain"
+	"github.com/skybytescode/elastic-grpc/proto/ingestworker"
 )
 
 type Adapter struct {
@@ -14,36 +15,27 @@ type Adapter struct {
 }
 
 func NewAdapter(dataWorkerServiceUrl string) (*Adapter, error) {
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	conn, err := grpc.NewClient(dataWorkerServiceUrl, opts...)
+	conn, err := grpc.NewClient(dataWorkerServiceUrl, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
-	client := ingestworker.NewRetrieveDataClient(conn)
-	return &Adapter{dataworker: client}, nil
+	return &Adapter{dataworker: ingestworker.NewRetrieveDataClient(conn)}, nil
 }
 
 func (a *Adapter) GetDataFromWorker(ctx context.Context) ([]domain.Adv, error) {
 	data, err := a.dataworker.GetData(ctx, &ingestworker.Empty{})
 	if err != nil {
-		log.Printf("error getting data from dataworker: %v", err)
+		return nil, err
 	}
-	var domainAds []domain.Adv
+	ads := make([]domain.Adv, 0, len(data.Ads))
 	for _, ad := range data.Ads {
-		domainAd := domain.Adv{
-			ID: ad.XId,
-			Categories: domain.Category{
-				Subcategory: ad.Categories.Subcategory,
-			},
-			Title: domain.Title{
-				Ro: ad.Title.Ro,
-				Ru: ad.Title.Ru,
-			},
-			Type:   ad.Type,
-			Posted: ad.Posted,
-		}
-		domainAds = append(domainAds, domainAd)
+		ads = append(ads, domain.Adv{
+			ID:         ad.XId,
+			Categories: domain.Category{Subcategory: ad.GetCategories().GetSubcategory()},
+			Title:      domain.Title{Ro: ad.GetTitle().GetRo(), Ru: ad.GetTitle().GetRu()},
+			Type:       ad.Type,
+			Posted:     ad.Posted,
+		})
 	}
-	return domainAds, nil
+	return ads, nil
 }

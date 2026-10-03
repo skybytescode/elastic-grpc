@@ -3,10 +3,9 @@ package httpServ
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"github.com/stretchr/testify/assert"
 	"github.com/skybytescode/elastic-grpc/data_store_service/internal/application/domain"
 	"github.com/skybytescode/elastic-grpc/data_store_service/mocks"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -15,8 +14,8 @@ import (
 
 func TestCreateItemHandler(t *testing.T) {
 	mockAPI := &mocks.MockAPIPort{
-		PlaceDataFn: func(ctx context.Context) error {
-			return nil
+		PlaceDataFn: func(ctx context.Context) (int, error) {
+			return 50, nil
 		},
 	}
 	adapter := NewAdapter(mockAPI, 8080)
@@ -29,7 +28,7 @@ func TestCreateItemHandler(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
-	assert.Equal(t, `"data successfully transferred into elastic database"`, strings.TrimSpace(rr.Body.String()))
+	assert.JSONEq(t, `{"indexed": 50}`, strings.TrimSpace(rr.Body.String()))
 }
 
 func TestGetAllDocsHandler(t *testing.T) {
@@ -37,25 +36,25 @@ func TestGetAllDocsHandler(t *testing.T) {
 		GetAllDataFn: func(ctx context.Context) ([]domain.Adv, error) {
 			return []domain.Adv{
 				{
-					ID: fmt.Sprintf("1"),
+					ID: "1",
 					Categories: domain.Category{
-						Subcategory: fmt.Sprintf("1401"),
+						Subcategory: "1401",
 					},
 					Title: domain.Title{
-						Ro: fmt.Sprintf("title_Ro"),
-						Ru: fmt.Sprintf("title_Ru"),
+						Ro: "title_Ro",
+						Ru: "title_Ru",
 					},
 					Type:   "standard",
 					Posted: 1486556302.101039,
 				},
 				{
-					ID: fmt.Sprintf("2"),
+					ID: "2",
 					Categories: domain.Category{
-						Subcategory: fmt.Sprintf("1401"),
+						Subcategory: "1401",
 					},
 					Title: domain.Title{
-						Ro: fmt.Sprintf("title_Ro"),
-						Ru: fmt.Sprintf("title_Ru"),
+						Ro: "title_Ro",
+						Ru: "title_Ru",
 					},
 					Type:   "standard",
 					Posted: 1486556302.101039,
@@ -85,13 +84,13 @@ func TestSearchByTitleHandler(t *testing.T) {
 		TextSearchFn: func(ctx context.Context, title string) ([]domain.Adv, error) {
 			return []domain.Adv{
 				{
-					ID: fmt.Sprintf("1"),
+					ID: "1",
 					Categories: domain.Category{
-						Subcategory: fmt.Sprintf("1401"),
+						Subcategory: "1401",
 					},
 					Title: domain.Title{
-						Ro: fmt.Sprintf("title_Ro"),
-						Ru: fmt.Sprintf("title_Ru"),
+						Ro: "title_Ro",
+						Ru: "title_Ru",
 					},
 					Type:   "standard",
 					Posted: 1486556302.101039,
@@ -121,25 +120,25 @@ func TestScrollSearchHandler(t *testing.T) {
 		ScrollSearchFn: func(ctx context.Context, from, size int) ([]domain.Adv, error) {
 			return []domain.Adv{
 				{
-					ID: fmt.Sprintf("1"),
+					ID: "1",
 					Categories: domain.Category{
-						Subcategory: fmt.Sprintf("1401"),
+						Subcategory: "1401",
 					},
 					Title: domain.Title{
-						Ro: fmt.Sprintf("title_Ro"),
-						Ru: fmt.Sprintf("title_Ru"),
+						Ro: "title_Ro",
+						Ru: "title_Ru",
 					},
 					Type:   "standard",
 					Posted: 1486556302.101039,
 				},
 				{
-					ID: fmt.Sprintf("2"),
+					ID: "2",
 					Categories: domain.Category{
-						Subcategory: fmt.Sprintf("1401"),
+						Subcategory: "1401",
 					},
 					Title: domain.Title{
-						Ro: fmt.Sprintf("title_Ro"),
-						Ru: fmt.Sprintf("title_Ru"),
+						Ro: "title_Ro",
+						Ru: "title_Ru",
 					},
 					Type:   "standard",
 					Posted: 1486556302.101039,

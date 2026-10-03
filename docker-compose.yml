@@ -1,25 +1,28 @@
-version: '3.8'
-
+# docker compose up --build
+# Elasticsearch on :9200, the gRPC ingest worker on :4001 and the HTTP API on :8080.
 services:
   elasticsearch:
-    build:
-      context: ./elasticsearchDock
-      dockerfile: Dockerfile
-    container_name: elasticsearch
+    image: elasticsearch:8.19.22
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false" # local development only
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
     ports:
       - "9200:9200"
-    environment:
-      - discovery.type=single-node
-      - ELASTIC_PASSWORD=ELASTIC_PASSWORD
-      - xpack.security.enabled=false
     volumes:
       - esdata:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
 
   grpcserver:
     build:
       context: .
       dockerfile: data_ingest_worker/Dockerfile
-    container_name: grpcserver
+    environment:
+      DATA_FILE: /data.json
     ports:
       - "4001:4001"
 
@@ -27,13 +30,16 @@ services:
     build:
       context: .
       dockerfile: data_store_service/Dockerfile
-    container_name: httpserver
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      DATA_INGEST_WORKER_URL: grpcserver:4001
     ports:
       - "8080:8080"
     depends_on:
-      - elasticsearch
-      - grpcserver
+      elasticsearch:
+        condition: service_healthy
+      grpcserver:
+        condition: service_started
 
 volumes:
   esdata:
-    driver: local

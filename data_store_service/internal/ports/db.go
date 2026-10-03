@@ -2,14 +2,14 @@ package ports
 
 import (
 	"context"
+
 	"github.com/skybytescode/elastic-grpc/data_store_service/internal/application/domain"
 )
 
 type DBPort interface {
-	SeedingData(ctx context.Context) error
-	InsertData(ctx context.Context, adv domain.Adv) error
-	GetAllDocuments() ([]domain.Adv, error)
-	FullTextSearch(keyword string) ([]domain.Adv, error)
-	InfiniteScroll(from int, size int) ([]domain.Adv, error)
-	AggregateBySubcategory() (map[string]int, error)
+	InsertAll(ctx context.Context, ads []domain.Adv) (int, error)
+	GetAllDocuments(ctx context.Context) ([]domain.Adv, error)
+	FullTextSearch(ctx context.Context, keyword string) ([]domain.Adv, error)
+	InfiniteScroll(ctx context.Context, from, size int) ([]domain.Adv, error)
+	AggregateBySubcategory(ctx context.Context) (map[string]int, error)
 }

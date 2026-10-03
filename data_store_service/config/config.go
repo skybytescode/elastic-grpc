@@ -1,3 +1,6 @@
+// Package config reads the service settings from the environment. Every
+// setting has a default that works for running everything on localhost;
+// docker-compose.yml sets the container addresses.
 package config
 
 import (
@@ -6,28 +9,22 @@ import (
 	"strconv"
 )
 
-func GetEnv() string {
-	return getEnvironmentValue("ENV")
-}
-func GetDataSourceURL() string {
-	return getEnvironmentValue("DATA_SOURCE_URL")
-}
 func GetApplicationPort() int {
-	portStr := getEnvironmentValue("APPLICATION_PORT")
-	port, err := strconv.Atoi(portStr)
+	port, err := strconv.Atoi(envOr("APPLICATION_PORT", "8080"))
 	if err != nil {
-		log.Fatalf("port: %s is invalid", portStr)
+		log.Fatalf("APPLICATION_PORT is not a number: %v", err)
 	}
 	return port
 }
 
-func GetDataIngestWorkerUrl() string {
-	return getEnvironmentValue("DATA_INGEST_WORKER_URL")
-}
+func GetDataIngestWorkerUrl() string   { return envOr("DATA_INGEST_WORKER_URL", "localhost:4001") }
+func GetElasticsearchURL() string      { return envOr("ELASTICSEARCH_URL", "http://localhost:9200") }
+func GetElasticsearchUsername() string { return os.Getenv("ELASTICSEARCH_USERNAME") }
+func GetElasticsearchPassword() string { return os.Getenv("ELASTICSEARCH_PASSWORD") }
 
-func getEnvironmentValue(key string) string {
-	if os.Getenv(key) == "" {
-		log.Fatalf("%s environment variable is missing.", key)
+func envOr(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
 	}
-	return os.Getenv(key)
+	return fallback
 }

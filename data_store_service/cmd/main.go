@@ -1,39 +1,30 @@
 package main
 
 import (
+	"context"
+	"log"
+	"time"
+
 	"github.com/skybytescode/elastic-grpc/data_store_service/config"
 	"github.com/skybytescode/elastic-grpc/data_store_service/internal/adapters/dataworker"
 	"github.com/skybytescode/elastic-grpc/data_store_service/internal/adapters/db"
 	"github.com/skybytescode/elastic-grpc/data_store_service/internal/adapters/httpServ"
 	"github.com/skybytescode/elastic-grpc/data_store_service/internal/application/api"
-	"log"
-	"os"
 )
 
 func main() {
-	err := os.Setenv("APPLICATION_PORT", "8080")
+	dbAdapter, err := db.NewAdapter(context.Background(), db.Config{
+		URL:      config.GetElasticsearchURL(),
+		Username: config.GetElasticsearchUsername(),
+		Password: config.GetElasticsearchPassword(),
+	}, 2*time.Minute) // Elasticsearch can take a while to start
 	if err != nil {
-		return
+		log.Fatalf("Failed to connect to Elasticsearch: %v", err)
 	}
-	err = os.Setenv("ENV", "development")
+	dataWorkerAdapter, err := dataworker.NewAdapter(config.GetDataIngestWorkerUrl())
 	if err != nil {
-		return
+		log.Fatalf("Failed to create the ingest worker client: %v", err)
 	}
-	//err = os.Setenv("DATA_INGEST_WORKER_URL", "127.0.0.1:4001")
-	err = os.Setenv("DATA_INGEST_WORKER_URL", "grpcserver:4001")
-	if err != nil {
-		return
-	}
-
-	dbAdapter, err := db.NewAdapter()
-	if err != nil {
-		log.Fatalf("Failed to connect to database. Error: %v", err)
-	}
-	dataWorkerAdaptor, err := dataworker.NewAdapter(config.GetDataIngestWorkerUrl())
-	if err != nil {
-		log.Fatalf("Failed to initialize payment stub. Error: %v", err)
-	}
-	application := api.NewApplication(dbAdapter, dataWorkerAdaptor)
-	httpAdapter := httpServ.NewAdapter(application, config.GetApplicationPort())
-	httpAdapter.Run()
+	application := api.NewApplication(dbAdapter, dataWorkerAdapter)
+	httpServ.NewAdapter(application, config.GetApplicationPort()).Run()
 }
