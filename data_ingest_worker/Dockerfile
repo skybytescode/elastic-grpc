@@ -1,26 +1,13 @@
-# Start with a base image that includes Golang tools necessary to compile Go code
-FROM golang:1.23-rc as builder
-
-# Set the Current Working Directory inside the container
-WORKDIR /usr/src/app
-
-# Copy the source code to the working directory
+# Built from the repository root: docker build -f data_ingest_worker/Dockerfile .
+FROM golang:1.26 AS build
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
 COPY . .
+RUN CGO_ENABLED=0 go build -ldflags='-s' -o /out/data_ingest_worker ./data_ingest_worker/cmd
 
-# Build the Go application with specific build flags
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o data_ingest_worker ./cmd/main.go
-
-# Start a new stage from a minimal base image
-FROM scratch
-
-# Copy the built binary from the previous stage into the container
-COPY --from=builder /usr/src/app/data_ingest_worker ./data_ingest_worker
-
-# Copy the data.json file from the build stage to the root directory of the container
-COPY ./adapters/db/data.json ./data.json
-
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=build /out/data_ingest_worker /data_ingest_worker
+COPY data_ingest_worker/adapters/db/data.json /data.json
 EXPOSE 4001
-# Set the command to run when the container starts
-CMD ["./data_ingest_worker"]
-
-
+ENTRYPOINT ["/data_ingest_worker"]

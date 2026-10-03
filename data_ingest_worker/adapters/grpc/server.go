@@ -2,10 +2,9 @@ package grpc
 
 import (
 	"fmt"
-	"github.com/w3gop2p/elasticGrpc-proto/golang/data_ingest_worker"
-	"github.com/w3gop2p/elasticGrpc/data_ingest_worker/config"
-	"github.com/w3gop2p/elasticGrpc/data_ingest_worker/internal/ports"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"github.com/skybytescode/elastic-grpc/proto/ingestworker"
+	"github.com/skybytescode/elastic-grpc/data_ingest_worker/config"
+	"github.com/skybytescode/elastic-grpc/data_ingest_worker/internal/ports"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"log"
@@ -16,7 +15,7 @@ type Adapter struct {
 	api    ports.APIPort
 	port   int
 	server *grpc.Server
-	data_ingest_worker.UnimplementedRetrieveDataServer
+	ingestworker.UnimplementedRetrieveDataServer
 }
 
 func NewAdapter(api ports.APIPort, port int) *Adapter {
@@ -31,11 +30,9 @@ func (a Adapter) Run() {
 		log.Fatalf("failed to listen on port %d, error: %v", a.port, err)
 	}
 
-	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
-	)
+	grpcServer := grpc.NewServer()
 	a.server = grpcServer
-	data_ingest_worker.RegisterRetrieveDataServer(grpcServer, a)
+	ingestworker.RegisterRetrieveDataServer(grpcServer, a)
 	if config.GetEnv() == "development" {
 		reflection.Register(grpcServer)
 	}

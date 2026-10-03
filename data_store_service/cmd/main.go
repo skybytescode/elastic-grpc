@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/w3gop2p/elasticGrpc/data_store_service/config"
-	"github.com/w3gop2p/elasticGrpc/data_store_service/internal/adapters/dataworker"
-	"github.com/w3gop2p/elasticGrpc/data_store_service/internal/adapters/db"
-	"github.com/w3gop2p/elasticGrpc/data_store_service/internal/adapters/httpServ"
-	"github.com/w3gop2p/elasticGrpc/data_store_service/internal/application/api"
+	"github.com/skybytescode/elastic-grpc/data_store_service/config"
+	"github.com/skybytescode/elastic-grpc/data_store_service/internal/adapters/dataworker"
+	"github.com/skybytescode/elastic-grpc/data_store_service/internal/adapters/db"
+	"github.com/skybytescode/elastic-grpc/data_store_service/internal/adapters/httpServ"
+	"github.com/skybytescode/elastic-grpc/data_store_service/internal/application/api"
 	"log"
 	"os"
 )

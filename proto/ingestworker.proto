@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option go_package = "github.com/skybytescode/elastic-grpc/proto/ingestworker";
+
+message Ad {
+  string _id = 1;
+  Category categories = 2;
+  Title title = 3;
+  string type = 4;
+  double posted = 5; // Unix time in seconds
+}
+
+message Category {
+  string subcategory = 1;
+}
+
+message Title {
+  string ro = 1;
+  string ru = 2;
+}
+
+// Define the GetDataResponse message
+message GetDataResponse {
+  repeated Ad ads = 1; // List of ads
+}
+
+// RetrieveData returns the ads the worker has ingested.
+service RetrieveData {
+  rpc GetData(Empty) returns (GetDataResponse);
+}
+// Define an empty message for the request
+message Empty {}

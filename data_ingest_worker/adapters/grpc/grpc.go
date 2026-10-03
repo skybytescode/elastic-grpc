@@ -3,27 +3,27 @@ package grpc
 import (
 	"context"
 	"fmt"
-	"github.com/w3gop2p/elasticGrpc-proto/golang/data_ingest_worker"
+	"github.com/skybytescode/elastic-grpc/proto/ingestworker"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"log"
 )
 
-func (a Adapter) GetData(ctx context.Context, empty *data_ingest_worker.Empty) (*data_ingest_worker.GetDataResponse, error) {
+func (a Adapter) GetData(ctx context.Context, empty *ingestworker.Empty) (*ingestworker.GetDataResponse, error) {
 	log.Println("Data Retrieving...")
 	result, err := a.api.GetData()
 	if err != nil {
-		return &data_ingest_worker.GetDataResponse{}, status.New(codes.Internal, fmt.Sprintf("failed to retrieve. %v ", err)).Err()
+		return &ingestworker.GetDataResponse{}, status.New(codes.Internal, fmt.Sprintf("failed to retrieve. %v ", err)).Err()
 	}
-	// Convert []domain.Ad to []*data_ingest_worker.Ad
-	var ads []*data_ingest_worker.Ad
+	// Convert []domain.Ad to []*ingestworker.Ad
+	var ads []*ingestworker.Ad
 	for _, ad := range result {
-		ads = append(ads, &data_ingest_worker.Ad{
+		ads = append(ads, &ingestworker.Ad{
 			XId: ad.ID,
-			Categories: &data_ingest_worker.Category{
+			Categories: &ingestworker.Category{
 				Subcategory: ad.Categories.Subcategory,
 			},
-			Title: &data_ingest_worker.Title{
+			Title: &ingestworker.Title{
 				Ro: ad.Title.Ro,
 				Ru: ad.Title.Ru,
 			},
@@ -31,5 +31,5 @@ func (a Adapter) GetData(ctx context.Context, empty *data_ingest_worker.Empty) (
 			Posted: ad.Posted,
 		})
 	}
-	return &data_ingest_worker.GetDataResponse{Ads: ads}, nil
+	return &ingestworker.GetDataResponse{Ads: ads}, nil
 }

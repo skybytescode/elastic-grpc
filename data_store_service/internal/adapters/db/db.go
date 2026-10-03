@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v8"
-	"github.com/w3gop2p/elasticGrpc/data_store_service/internal/application/domain"
+	"github.com/skybytescode/elastic-grpc/data_store_service/internal/application/domain"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -187,7 +187,7 @@ func (c *Adapter) SeedingData(ctx context.Context) error {
 		Type:   "standard",
 		Posted: 1486556302.101039,
 	}); err != nil {
-		return fmt.Errorf("failed seeding data with id %d: %v", err)
+		return fmt.Errorf("failed seeding data: %v", err)
 	}
 	return nil
 }

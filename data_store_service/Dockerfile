@@ -1,23 +1,12 @@
-# Second stage: Build the Go application
-FROM golang:1.23-rc as builder
-
-# Set the Current Working Directory inside the container
-WORKDIR /usr/src/app
-
-
-# Copy the source code to the working directory
+# Built from the repository root: docker build -f data_store_service/Dockerfile .
+FROM golang:1.26 AS build
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
 COPY . .
+RUN CGO_ENABLED=0 go build -ldflags='-s' -o /out/data_store_service ./data_store_service/cmd
 
-# Build the Go application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o data_store_service ./cmd/main.go
-
-# Start a new stage from a minimal base image
-FROM scratch
-
-# Copy the built binary from the previous stage into the container
-COPY --from=builder /usr/src/app/data_store_service ./data_store_service
-
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=build /out/data_store_service /data_store_service
 EXPOSE 8080
-# Set the command to run when the container starts
-CMD ["./data_store_service"]
-
+ENTRYPOINT ["/data_store_service"]

@@ -2,34 +2,30 @@ package dataworker
 
 import (
 	"context"
-	"github.com/w3gop2p/elasticGrpc-proto/golang/data_ingest_worker"
-	"github.com/w3gop2p/elasticGrpc/data_store_service/internal/application/domain"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"github.com/skybytescode/elastic-grpc/proto/ingestworker"
+	"github.com/skybytescode/elastic-grpc/data_store_service/internal/application/domain"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
 )
 
 type Adapter struct {
-	dataworker data_ingest_worker.RetrieveDataClient
+	dataworker ingestworker.RetrieveDataClient
 }
 
 func NewAdapter(dataWorkerServiceUrl string) (*Adapter, error) {
 	var opts []grpc.DialOption
-	opts = append(opts,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
-	)
-	conn, err := grpc.Dial(dataWorkerServiceUrl, opts...)
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(dataWorkerServiceUrl, opts...)
 	if err != nil {
 		return nil, err
 	}
-	client := data_ingest_worker.NewRetrieveDataClient(conn)
+	client := ingestworker.NewRetrieveDataClient(conn)
 	return &Adapter{dataworker: client}, nil
 }
 
 func (a *Adapter) GetDataFromWorker(ctx context.Context) ([]domain.Adv, error) {
-	data, err := a.dataworker.GetData(ctx, &data_ingest_worker.Empty{})
+	data, err := a.dataworker.GetData(ctx, &ingestworker.Empty{})
 	if err != nil {
 		log.Printf("error getting data from dataworker: %v", err)
 	}

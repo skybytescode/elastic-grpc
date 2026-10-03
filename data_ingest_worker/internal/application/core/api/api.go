@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/w3gop2p/elasticGrpc/data_ingest_worker/internal/application/domain"
-	"github.com/w3gop2p/elasticGrpc/data_ingest_worker/internal/ports"
+	"github.com/skybytescode/elastic-grpc/data_ingest_worker/internal/application/domain"
+	"github.com/skybytescode/elastic-grpc/data_ingest_worker/internal/ports"
 )
 
 type Application struct {

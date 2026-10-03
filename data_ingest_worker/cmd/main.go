@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/w3gop2p/elasticGrpc/data_ingest_worker/adapters/db"
-	"github.com/w3gop2p/elasticGrpc/data_ingest_worker/adapters/grpc"
-	"github.com/w3gop2p/elasticGrpc/data_ingest_worker/config"
-	"github.com/w3gop2p/elasticGrpc/data_ingest_worker/internal/application/core/api"
+	"github.com/skybytescode/elastic-grpc/data_ingest_worker/adapters/db"
+	"github.com/skybytescode/elastic-grpc/data_ingest_worker/adapters/grpc"
+	"github.com/skybytescode/elastic-grpc/data_ingest_worker/config"
+	"github.com/skybytescode/elastic-grpc/data_ingest_worker/internal/application/core/api"
 	"log"
 	"os"
 )

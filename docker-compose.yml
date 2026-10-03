@@ -17,16 +17,16 @@ services:
 
   grpcserver:
     build:
-      context: ./data_ingest_worker
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: data_ingest_worker/Dockerfile
     container_name: grpcserver
     ports:
       - "4001:4001"
 
   httpserver:
     build:
-      context: ./data_store_service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: data_store_service/Dockerfile
     container_name: httpserver
     ports:
       - "8080:8080"

@@ -2,8 +2,8 @@ package api
 
 import (
 	"context"
-	"github.com/w3gop2p/elasticGrpc/data_store_service/internal/application/domain"
-	"github.com/w3gop2p/elasticGrpc/data_store_service/internal/ports"
+	"github.com/skybytescode/elastic-grpc/data_store_service/internal/application/domain"
+	"github.com/skybytescode/elastic-grpc/data_store_service/internal/ports"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

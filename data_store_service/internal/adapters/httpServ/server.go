@@ -3,7 +3,7 @@ package httpServ
 import (
 	"context"
 	"fmt"
-	"github.com/w3gop2p/elasticGrpc/data_store_service/internal/ports"
+	"github.com/skybytescode/elastic-grpc/data_store_service/internal/ports"
 	"log"
 	"net/http"
 	"os"
