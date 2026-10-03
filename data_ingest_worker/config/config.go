@@ -1,3 +1,5 @@
+// Package config reads the worker settings from the environment, with
+// defaults that work when running from the data_ingest_worker folder.
 package config
 
 import (
@@ -6,28 +8,22 @@ import (
 	"strconv"
 )
 
-func GetEnv() string {
-	return getEnvironmentValue("ENV")
-}
-
-func GetDataSourceURL() string {
-	return getEnvironmentValue("DATA_SOURCE_URL")
-}
+func GetEnv() string { return envOr("ENV", "development") }
 
 func GetApplicationPort() int {
-	portStr := getEnvironmentValue("APPLICATION_PORT")
-	port, err := strconv.Atoi(portStr)
-
+	port, err := strconv.Atoi(envOr("APPLICATION_PORT", "4001"))
 	if err != nil {
-		log.Fatalf("port: %s is invalid", portStr)
+		log.Fatalf("APPLICATION_PORT is not a number: %v", err)
 	}
-
 	return port
 }
-func getEnvironmentValue(key string) string {
-	if os.Getenv(key) == "" {
-		log.Fatalf("%s environment variable is missing.", key)
-	}
 
-	return os.Getenv(key)
+// GetDataFile is the JSON file with the ads to serve.
+func GetDataFile() string { return envOr("DATA_FILE", "adapters/db/data.json") }
+
+func envOr(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
 }

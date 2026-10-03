@@ -2,18 +2,17 @@ package grpc
 
 import (
 	"context"
-	"fmt"
 	"github.com/skybytescode/elastic-grpc/proto/ingestworker"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"log"
 )
 
-func (a Adapter) GetData(ctx context.Context, empty *ingestworker.Empty) (*ingestworker.GetDataResponse, error) {
+func (a *Adapter) GetData(ctx context.Context, empty *ingestworker.Empty) (*ingestworker.GetDataResponse, error) {
 	log.Println("Data Retrieving...")
 	result, err := a.api.GetData()
 	if err != nil {
-		return &ingestworker.GetDataResponse{}, status.New(codes.Internal, fmt.Sprintf("failed to retrieve. %v ", err)).Err()
+		return nil, status.Errorf(codes.Internal, "failed to retrieve ads: %v", err)
 	}
 	// Convert []domain.Ad to []*ingestworker.Ad
 	var ads []*ingestworker.Ad

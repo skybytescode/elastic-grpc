@@ -2,18 +2,20 @@ package mocks
 
 import (
 	"context"
+
 	"github.com/skybytescode/elastic-grpc/data_store_service/internal/application/domain"
 )
 
+// MockAPIPort implements ports.APIPort with replaceable functions.
 type MockAPIPort struct {
-	PlaceDataFn            func(ctx context.Context) error
+	PlaceDataFn            func(ctx context.Context) (int, error)
 	GetAllDataFn           func(ctx context.Context) ([]domain.Adv, error)
 	TextSearchFn           func(ctx context.Context, title string) ([]domain.Adv, error)
 	ScrollSearchFn         func(ctx context.Context, from, size int) ([]domain.Adv, error)
 	AggregateSubcategoryFn func(ctx context.Context) (map[string]int, error)
 }
 
-func (m *MockAPIPort) PlaceData(ctx context.Context) error {
+func (m *MockAPIPort) PlaceData(ctx context.Context) (int, error) {
 	return m.PlaceDataFn(ctx)
 }
 
@@ -31,8 +33,4 @@ func (m *MockAPIPort) ScrollSearch(ctx context.Context, from, size int) ([]domai
 
 func (m *MockAPIPort) AggregateSubcategory(ctx context.Context) (map[string]int, error) {
 	return m.AggregateSubcategoryFn(ctx)
-}
-
-func (m *MockAPIPort) SeedData(ctx context.Context) error {
-	return m.SeedData(ctx)
 }

@@ -21,19 +21,22 @@ func NewAdapter(api ports.APIPort, port int) *Adapter {
 	return &Adapter{api: api, port: port}
 }
 
-func (a *Adapter) Run() {
+// routes maps the URLs to their handlers.
+func (a *Adapter) routes() http.Handler {
 	mux := http.NewServeMux()
+	mux.HandleFunc("/create", a.createItemHandler)     // POST: ingest worker -> Elasticsearch
+	mux.HandleFunc("/getalldocs", a.getAllDocsHandler) // all ads, newest first
+	mux.HandleFunc("/searchTitle", a.searchByTitle)    // ?title=apartamente
+	mux.HandleFunc("/scroll", a.scrollSearch)          // ?from=0&size=10
+	mux.HandleFunc("/aggsub", a.aggSubcategory)        // ad count per subcategory
+	return mux
+}
 
-	// Define your routes here
-	mux.HandleFunc("/seeddata", a.seedItemHandler)     // http://localhost:8080/seeddata
-	mux.HandleFunc("/create", a.createItemHandler)     // http://localhost:8080/create
-	mux.HandleFunc("/getalldocs", a.getAllDocsHandler) // http://localhost:8080/getalldocs
-	mux.HandleFunc("/searchTitle", a.searchByTitle)    //http://localhost:8080/searchTitle?title=se
-	mux.HandleFunc("/scroll", a.scrollSearch)          // http://localhost:8080/scroll?from=1&size=5
-	mux.HandleFunc("/aggsub", a.aggSubcategory)        // http://localhost:8080/aggsub
+func (a *Adapter) Run() {
 	a.server = &http.Server{
-		Addr:    fmt.Sprintf(":%d", a.port),
-		Handler: mux,
+		Addr:              fmt.Sprintf(":%d", a.port),
+		Handler:           a.routes(),
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	// Start the server in a separate goroutine
